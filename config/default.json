@@ -1,3 +1,4 @@
 {
-    "mongoURI": "mongodb+srv://guptasid19:6jsVG5H6D458gYh3@cluster0-zrspg.mongodb.net/test?retryWrites=true&w=majority"
+    "mongoURI": "mongodb+srv://guptasid19:6jsVG5H6D458gYh3@cluster0-zrspg.mongodb.net/test?retryWrites=true&w=majority",
+    "jwtSecret": "mySecretToken"
 }
