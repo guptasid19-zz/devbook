@@ -3,6 +3,7 @@ const connectDB = require('./config/db');
 var bodyParser = require('body-parser')
 
 const userRoutes = require('./routes/users');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -12,12 +13,14 @@ connectDB();
 
 const port = process.env.port || 8080;
 
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+
 
 app.get('/', (req, res) => {
     res.send('Hello world');
 })
 
 app.listen(port, () => {
-    console.log(`Server srated running on ${port}.`);
+    console.log(`Server started running on ${port}.`);
 })
