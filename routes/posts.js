@@ -141,4 +141,68 @@ router.put('/:post_id/dislike', auth, async (req, res) => {
     }
 })
 
+// Api for commenting on a post
+
+router.put('/:post_id/comments', [auth,
+    // text is required
+    check('text', 'Text is required.')
+    .not()
+    .isEmpty()
+  ], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const user = await User.findOne({_id: req.user.id});
+        let post = await Post.findOne({_id: req.params.post_id});
+
+        let newComment = {
+            text: req.body.text,
+            user: user,
+            name: user.name,
+            avatar: user.avatar
+        }
+
+        post.comments.unshift(newComment);
+        post = await post.save();
+        res.json(post.comments);
+    } catch(err){
+        console.log(err);
+        res.status(500).send('Server Error');
+    }
+})
+
+// Api to delete a comment on a post
+
+router.delete('/:post_id/comments/:comment_id', auth, async (req, res) => {
+    try {
+        let post = await Post.findOne({_id: req.params.post_id})
+        if(!post){
+            return res.status(400).json({msg: 'Post not found'});
+        }
+
+        if(!post.comments.filter(comment => comment.id === req.params.comment_id).length > 0){
+            return res.status(400).json({msg: 'Comment not found.'});
+        }
+
+        const removeIndex = post.comments.map(comment => comment.id).indexOf(req.params.comment_id);
+
+        if(post.comments[removeIndex].user != req.user.id){
+            return res.status(401).json({msg: 'User not authorized.'});
+        }
+        post.comments.splice(removeIndex, 1);
+        await post.save();
+        res.json(post.comments);
+
+    } catch (err) {
+        console.log(err);
+        if(err.kind == 'ObjectId'){
+            return res.status(400).json({msg: 'Post not found'});
+        }
+        res.status(500).send('Server error');
+    }
+})
+
 module.exports = router;
