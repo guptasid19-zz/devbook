@@ -7,6 +7,8 @@ const Profile = require('../models/Profile');
 
 const { check, validationResult } = require('express-validator');
 
+// Api to get current user profile
+
 router.get('/me', auth, async (req, res) => {
     try {
         const profile = await Profile.findOne({user: req.user.id})
@@ -23,6 +25,42 @@ router.get('/me', auth, async (req, res) => {
     }
 });
 
+// Api to get profiles of all users
+
+router.get('/', auth, async (req, res) => {
+    try {
+        const profiles = await Profile.find({})
+        .populate('user', ['name', 'avatar']);
+    
+        res.json(profiles);
+    } catch(err){
+        console.log(err);
+        res.status(500).send('Server error');
+    }
+});
+
+// Api to get profile os user with particular user id
+
+router.get('/users/:user_id', auth, async (req, res) => {
+    try {
+        const profile = await Profile.findOne({user: req.params.user_id})
+        .populate('user', ['name', 'avatar']);
+    
+        if(!profile){
+            return res.status(400).json({msg: 'Profile not found.'});
+        }
+
+        res.json(profile);
+    } catch(err){
+        if(err.kind == 'ObjectId'){
+            return res.status(400).json({msg: 'Profile not found.'});
+        }
+        console.log(err);
+        res.status(500).send('Server error');
+    }
+});
+
+// Api to create or update profile of current user
 
 router.post('/', [ auth,
     // status is required
