@@ -139,4 +139,21 @@ router.post('/', [ auth,
     }
 })
 
+// Api to delete profile of current user
+
+router.delete('/', auth, async (req, res) => {
+
+    try {
+        // Delete profile of user
+        await Profile.findOneAndRemove({user: req.user.id});
+        // Delete user
+        await User.findOneAndRemove({_id: req.user.id});
+        res.json({msg: 'User and profile deleted successfully.'});        
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Server Error");
+    }
+
+})
+
 module.exports = router;
