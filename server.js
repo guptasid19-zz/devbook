@@ -4,6 +4,7 @@ var bodyParser = require('body-parser')
 
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 
@@ -11,10 +12,11 @@ app.use(bodyParser.json({ extended: false }))
 
 connectDB();
 
-const port = process.env.port || 8080;
+const port = process.env.port || 8081;
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/profile', profileRoutes);
 
 
 app.get('/', (req, res) => {
