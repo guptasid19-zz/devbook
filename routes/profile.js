@@ -156,4 +156,84 @@ router.delete('/', auth, async (req, res) => {
 
 })
 
+// Api to add education to profile of user
+
+router.put('/experience', [ auth,
+    // title is required
+    check('title', 'Title is required.')
+    .not()
+    .isEmpty(),
+    // company is required
+    check('company', 'Company is required.')
+    .not()
+    .isEmpty(),
+    check('from', 'From is required.')
+    .not()
+    .isEmpty(),
+  ], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        let profile = await Profile.findOne({user: req.user.id});
+
+        if(!profile){
+            return res.status(400).json({msg: 'Profile not found for this user.'});
+        }
+
+        const {
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description 
+        } = req.body;
+
+        // Build profile object
+        const experience = {
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description
+        }
+
+        profile.experience.unshift(experience);
+
+        profile = await profile.save();
+        res.json(profile);
+
+    } catch(err){
+        console.log(err);
+        res.status(500).send('Server Error');
+    }
+})
+
+// Api to delete an experience in user profile
+
+router.delete('/experience/:experience_id', auth, async (req, res) => {
+
+    try {
+        let profile = await Profile.findOne({user: req.user.id});      
+        const index = profile.experience.map(exp => exp.id).indexOf(req.params.experience_id);
+        if(index < 0){
+            return res.status(400).json({msg: 'Experience not found.'});
+        }
+        profile.experience.splice(index, 1);
+        profile = await profile.save();
+        res.json(profile);
+        
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Server Error");
+    }
+
+})
+
 module.exports = router;
